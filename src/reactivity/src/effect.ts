@@ -1,3 +1,4 @@
+import { extend } from "../../shared/src";
 
 const targetMap = new WeakMap();
 let activeEffect = void 0;
@@ -9,7 +10,6 @@ export class ReactiveEffect {
   }
 
   run() {
-    console.log('run');
 
     activeEffect = this as any;
     const result = this.fn();
@@ -18,10 +18,17 @@ export class ReactiveEffect {
   }
 }
 
-export function effect(fn, options = {}) {
+export function effect(fn, options?) {
   const _effect = new ReactiveEffect(fn);
-
+  if (options) {
+    extend(_effect, options)
+  }
   _effect.run();
+
+  // 返回runner，让用户自行选择调用时机(effectFn)
+  const runner = _effect.run.bind(_effect);
+
+  return runner;
 }
 
 export function track(target, key) {
@@ -42,5 +49,11 @@ export function track(target, key) {
 export function trigger(target, key) {
   const depsMap = targetMap.get(target);
   const deps = depsMap.get(key);
-  deps.forEach(effect => effect.run())
+  deps.forEach(effect => {
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
+    }
+  })
 }

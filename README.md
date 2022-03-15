@@ -6,7 +6,24 @@
 ## Task
 
 ### reactivity
+目标是用自己的 reactivity 支持现有的 demo 运行
 
+- [x] reactive 的实现
+- [x] track 依赖收集
+- [x] trigger 触发依赖
+- [x] effect 的实现
+- [x] 支持 effect.scheduler
+- [ ] 支持 effect.stop
+- [ ] ref 的实现
+- [ ] readonly 的实现
+- [ ] computed 的实现
+- [ ] 支持 isReactive
+- [ ] 支持嵌套 reactive
+- [ ] 支持 toRaw
+- [ ] 支持 isReadonly
+- [ ] 支持 isProxy
+- [ ] 支持 shallowReadonly
+- [ ] 支持 proxyRefs
 ### runtime-core
 
 ### runtime-dom
