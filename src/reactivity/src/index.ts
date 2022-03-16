@@ -1,7 +1,12 @@
 export {
-  reactive
+  reactive,
+  isReactive,
+  readonly,
+  isProxy,
+  isReadonly
 } from './reactive'
 
 export {
-  effect
+  effect,
+  stop
 } from './effect'

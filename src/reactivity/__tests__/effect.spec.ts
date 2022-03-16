@@ -1,4 +1,5 @@
-import { effect, reactive } from "../src";
+import { effect, reactive, stop } from "../src";
+
 
 describe('effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
@@ -54,5 +55,27 @@ describe('effect', () => {
     obj.foo++;
     expect(scheduler).toBeCalledTimes(1);
     expect(dummy).toBe(4);
+  })
+
+  it('effect stop', () => {
+    let dummy;
+    const obj = reactive({ prop: 1 });
+    const runner = effect(() => {
+      dummy = obj.prop;
+    })
+    obj.prop = 2;
+    expect(dummy).toBe(2);
+    stop(runner);
+    // obj.prop = 3;
+    obj.prop++;
+    expect(dummy).toBe(2);
+
+    // stop后的effect还能够被手动调用
+    runner();
+    expect(dummy).toBe(3);
+
+    // stop后只能手动的调用，并没有恢复依赖收集
+    obj.prop = 5;
+    expect(dummy).toBe(3);
   })
 })

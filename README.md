@@ -13,16 +13,18 @@
 - [x] trigger 触发依赖
 - [x] effect 的实现
 - [x] 支持 effect.scheduler
-- [ ] 支持 effect.stop
-- [ ] ref 的实现
-- [ ] readonly 的实现
-- [ ] computed 的实现
-- [ ] 支持 isReactive
+- [x] 支持 effect.stop
+- [x] readonly 的实现
+- [x] 支持 isReactive
+- [x] 支持 isReadonly
+- [x] 支持 isProxy
 - [ ] 支持嵌套 reactive
-- [ ] 支持 toRaw
-- [ ] 支持 isReadonly
-- [ ] 支持 isProxy
+- [ ] 支持嵌套 readonly
 - [ ] 支持 shallowReadonly
+- [ ] 支持 shallowReactive
+- [ ] ref 的实现
+- [ ] computed 的实现
+- [ ] 支持 toRaw
 - [ ] 支持 proxyRefs
 ### runtime-core
 

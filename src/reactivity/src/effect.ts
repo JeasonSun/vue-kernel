@@ -2,19 +2,41 @@ import { extend } from "../../shared/src";
 
 const targetMap = new WeakMap();
 let activeEffect = void 0;
+let shouldTrack = false;
 
 export class ReactiveEffect {
-
+  deps: any[] = [];
+  active = true;
   constructor(public fn, public scheduler?) {
-    console.log('创建ReactiveEffect对象');
+
   }
 
   run() {
 
+    if (!this.active) {
+      return this.fn();
+    }
+
     activeEffect = this as any;
+    shouldTrack = true;
+
     const result = this.fn();
 
+    activeEffect = undefined;
+    shouldTrack = false;
+
     return result;
+  }
+
+  stop() {
+    if (this.active) {
+      this.deps.forEach(dep => {
+        dep.delete(this)
+      })
+      this.deps.length = 0;
+      this.active = false;
+    }
+
   }
 }
 
@@ -26,24 +48,40 @@ export function effect(fn, options?) {
   _effect.run();
 
   // 返回runner，让用户自行选择调用时机(effectFn)
-  const runner = _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
+  runner.effect = _effect;
 
   return runner;
 }
 
+export function stop(runner) {
+  runner.effect.stop();
+}
+
 export function track(target, key) {
+  // 如果响应式数据不在effect中，那直接不用收集了，因为收集了也没有触发更新的时机。
+  if (!activeEffect) {
+    return;
+  }
+  if (!shouldTrack) {
+    return;
+  }
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
     targetMap.set(target, depsMap);
   }
 
-  let deps = depsMap.get(key);
-  if (!deps) {
-    deps = new Set();
-    depsMap.set(key, deps);
+  let dep = depsMap.get(key);
+  if (!dep) {
+    dep = new Set();
+    depsMap.set(key, dep);
   }
-  deps.add(activeEffect);
+  if (!dep.has(activeEffect)) {
+    dep.add(activeEffect);
+    (activeEffect as any).deps.push(dep);
+  }
+
 }
 
 export function trigger(target, key) {

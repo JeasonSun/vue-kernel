@@ -1,12 +1,10 @@
-import { reactive, effect } from "../src";
+import { isReactive, reactive } from "../src";
 
 describe('reactive', () => {
-  test('Object', () => {
+  it('Object', () => {
     const original = { foo: 1 };
     const observed = reactive(original);
     expect(observed).not.toBe(original);
-    // expect(isReactive(observed)).toBe(true);
-    // expect(isReactive(original)).toBe(false);
 
     // get
     expect(observed.foo).toBe(1);
@@ -14,5 +12,8 @@ describe('reactive', () => {
 
     // ownKeys
     expect(Object.keys(observed)).toEqual(['foo'])
+
+    expect(isReactive(observed)).toBe(true);
+    expect(isReactive(original)).toBe(false);
   })
 })
