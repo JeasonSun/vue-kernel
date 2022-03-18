@@ -14,7 +14,6 @@ describe('readonly', () => {
     expect(isReadonly(wrapped.bar)).toBe(true);
     expect(isReactive(original.bar)).toBe(false);
     expect(isReadonly(original.bar)).toBe(false);
-
     expect(wrapped.foo).toBe(1);
   })
 })
