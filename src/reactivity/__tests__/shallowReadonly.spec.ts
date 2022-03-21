@@ -10,7 +10,7 @@ describe('shallowReadonly', () => {
     const original = { foo: {} };
     const shallowProxy = shallowReadonly(original);
     const readonlyProxy = readonly(original);
-    expect(shallowProxy).not.toBe(shallowProxy);
+    expect(shallowProxy).not.toBe(readonlyProxy);
     // 使用shallowReadonly函数包装过的对象，只有最外层属性是只读的，内层仍然可以改写。
     expect(isReadonly(shallowProxy.foo)).toBe(false);
     // 

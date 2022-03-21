@@ -4,6 +4,7 @@ import { reactive, ReactiveFlags, readonly } from "./reactive";
 
 const get = createGetter();
 const readonlyGet = createGetter(true);
+const shallowReadonlyGet = createGetter(true, true);
 
 export const mutableHandlers = {
   get,
@@ -16,6 +17,14 @@ export const mutableHandlers = {
 
 export const readonlyHandlers = {
   get: readonlyGet,
+  set: (target, key) => {
+    console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`)
+    return true;
+  }
+}
+
+export const shallowReadonlyHandlers = {
+  get: shallowReadonlyGet,
   set: (target, key) => {
     console.warn(`Set operation on key "${String(key)}" failed: target is readonly.`)
     return true;
@@ -36,6 +45,11 @@ function createGetter(isReadonly = false, shallow = false) {
     if (!isReadonly) {
       track(target, key);
     }
+
+    if (shallow) {
+      return res;
+    }
+
     if (isObject(res)) {
       return isReadonly ? readonly(res) : reactive(res);
     }

@@ -3,7 +3,8 @@ export {
   isReactive,
   readonly,
   isProxy,
-  isReadonly
+  isReadonly,
+  shallowReadonly
 } from './reactive'
 
 export {
