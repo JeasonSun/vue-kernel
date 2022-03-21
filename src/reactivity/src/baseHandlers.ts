@@ -5,6 +5,7 @@ import { reactive, ReactiveFlags, readonly } from "./reactive";
 const get = createGetter();
 const readonlyGet = createGetter(true);
 const shallowReadonlyGet = createGetter(true, true);
+const shallowReactiveGet = createGetter(false, true);
 
 export const mutableHandlers = {
   get,
@@ -31,6 +32,15 @@ export const shallowReadonlyHandlers = {
   }
 }
 
+export const shallowReactiveHandlers = {
+  get: shallowReactiveGet,
+  set: (target, key, newValue, receiver) => {
+    const res = Reflect.set(target, key, newValue, receiver);
+    trigger(target, key);
+    return res;
+  }
+}
+
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target, key, receiver) {
     if (key === ReactiveFlags.IS_READONLY) {
@@ -38,6 +48,10 @@ function createGetter(isReadonly = false, shallow = false) {
     }
     if (key === ReactiveFlags.IS_REACTIVE) {
       return !isReadonly;
+    }
+
+    if (key === ReactiveFlags.IS_SHALLOW){
+      return shallow;
     }
 
     const res = Reflect.get(target, key, receiver);

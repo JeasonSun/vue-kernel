@@ -21,7 +21,7 @@
 - [x] 支持嵌套 reactive
 - [x] 支持嵌套 readonly
 - [x] 支持 shallowReadonly
-- [ ] 支持 shallowReactive
+- [x] 支持 shallowReactive
 - [ ] ref 的实现
 - [ ] computed 的实现
 - [ ] 支持 toRaw

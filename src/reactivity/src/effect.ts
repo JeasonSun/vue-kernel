@@ -86,6 +86,10 @@ export function track(target, key) {
 
 export function trigger(target, key) {
   const depsMap = targetMap.get(target);
+  if(!depsMap){
+    // 没有被track， 比如 shallowReactive.spec.ts中，shallowReactive，没有收集依赖，但是在修改props.n时候触发更新，找不到depsMap
+    return;
+  }
   const deps = depsMap.get(key);
   deps.forEach(effect => {
     if (effect.scheduler) {
