@@ -6,10 +6,9 @@ export {
   isReadonly,
   shallowReadonly,
   shallowReactive,
-  isShallow
-} from './reactive'
+  isShallow,
+} from "./reactive";
 
-export {
-  effect,
-  stop
-} from './effect'
+export { ref } from "./ref";
+
+export { effect, stop } from "./effect";
