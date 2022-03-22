@@ -24,9 +24,10 @@
 - [x] 支持 shallowReactive
 - [x] ref 的实现
 - [x] isRef和unRef的实现
+- [ ] 支持 proxyRefs
 - [ ] computed 的实现
 - [ ] 支持 toRaw
-- [ ] 支持 proxyRefs
+
 ### runtime-core
 
 ### runtime-dom

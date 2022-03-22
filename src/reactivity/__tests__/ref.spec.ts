@@ -1,4 +1,4 @@
-import { effect, isRef, reactive, ref, unRef } from "../src";
+import { effect, isRef, proxyRefs, reactive, ref, unRef } from "../src";
 
 describe("reactive/ref", () => {
   it("should hold a value", () => {
@@ -57,4 +57,23 @@ describe("reactive/ref", () => {
     expect(unRef(a)).toBe(1);
     expect(unRef(1)).toBe(1);
   });
+
+  it('proxyRefs', () =>{
+    const user = {
+      age: ref(10),
+      name: "mojie",
+    };
+    const proxyUser = proxyRefs(user);
+    expect(user.age.value).toBe(10);
+    expect(proxyUser.age).toBe(10);
+    expect(proxyUser.name).toBe("mojie");
+
+    (proxyUser as any).age = 20;
+    expect(proxyUser.age).toBe(20);
+    expect(user.age.value).toBe(20);
+
+    proxyUser.age = ref(18);
+    expect(proxyUser.age).toBe(18);
+    expect(user.age.value).toBe(18);
+  })
 });

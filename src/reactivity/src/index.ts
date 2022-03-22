@@ -9,6 +9,6 @@ export {
   isShallow,
 } from "./reactive";
 
-export { ref, isRef, unRef } from "./ref";
+export { ref, isRef, unRef,proxyRefs } from "./ref";
 
 export { effect, stop } from "./effect";
