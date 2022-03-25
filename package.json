@@ -4,7 +4,9 @@
   "description": "study vue3 source and reinvent the wheel",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,8 @@
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.1",
     "babel-jest": "^27.5.1",
-    "jest": "^27.5.1"
+    "execa": "^5.0.0",
+    "jest": "^27.5.1",
+    "rollup": "^2.70.1"
   }
 }
