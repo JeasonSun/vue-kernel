@@ -1,4 +1,5 @@
-import { extend } from "../../shared/src";
+import { extend } from "@vue-kernel/shared";
+
 
 const targetMap = new WeakMap();
 let activeEffect = void 0;

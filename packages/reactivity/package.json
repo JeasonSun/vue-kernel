@@ -7,7 +7,7 @@
     "name": "VueReactivity",
     "formats": [
       "esm-bundler",
-      "ems-browser",
+      "esm-browser",
       "cjs",
       "global"
     ]

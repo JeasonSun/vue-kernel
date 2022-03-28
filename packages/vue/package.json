@@ -1,0 +1,13 @@
+{
+  "name": "@vue-kernel/vue",
+  "version": "1.0.0",
+  "main": "index.js",
+  "module": "dist/vue.esm-bundler.js",
+  "buildOptions": {
+    "formats": [
+      "esm-bundler", 
+      "cjs"
+    ]
+  },
+  "license": "MIT"
+}

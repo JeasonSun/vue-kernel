@@ -1,0 +1,1 @@
+{"version":3,"file":"runtime-core.cjs.js","sources":["../src/apiCreateApp.ts"],"sourcesContent":["export function createAppAPI(render) {}\n\nexport function createApp(rootComponent) {}\n"],"names":[],"mappings":";;;;AAEgB,SAAA,SAAS,CAAC,aAAa;;;;"}

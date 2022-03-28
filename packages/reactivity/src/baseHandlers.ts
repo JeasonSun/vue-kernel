@@ -1,4 +1,5 @@
-import { isObject } from "../../shared/src";
+
+import { isObject } from "@vue-kernel/shared";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
 
