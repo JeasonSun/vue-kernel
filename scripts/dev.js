@@ -3,4 +3,13 @@
  *  本项目核心目标不在于打包，所以，dev & build都使用rollup
  */
 
+const execa = require("execa");
+const target = "vue";
 
+execa(
+  "rollup",
+  ["-wc", "--environment", [`TARGET:${target}`].filter(Boolean).join(",")],
+  {
+    stdio: "inherit",
+  }
+);
