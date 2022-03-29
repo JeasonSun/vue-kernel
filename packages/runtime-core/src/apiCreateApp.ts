@@ -12,4 +12,5 @@ export function createApp(rootComponent) {
       render(vnode, rootContainer);
     },
   };
+  return app;
 }

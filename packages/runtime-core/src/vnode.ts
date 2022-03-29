@@ -23,3 +23,14 @@ export const createVNode = function (type, props?, children?) {
   };
   return vnode;
 };
+
+export const Text = Symbol("Text");
+export const Fragment = Symbol("Fragment");
+
+export function normalizeVNode(child) {
+  if (typeof child === "string" || typeof child === "number") {
+    return createVNode(Text, null, String(child));
+  } else {
+    return child;
+  }
+}

@@ -295,8 +295,72 @@ const createVNode = function (type, props, children) {
     };
     return vnode;
 };
+const Text = Symbol("Text");
+const Fragment = Symbol("Fragment");
+
+function createComponentInstance(vnode) {
+    const instance = {
+        type: vnode.type,
+        vnode,
+        isMounted: false,
+        setupState: {},
+    };
+    return instance;
+}
+function setupComponent(instance) {
+    console.log("setupComponent", instance);
+    instance.vnode;
+}
+
+function render(vnode, container) {
+    patch(vnode);
+}
+function patch(vnode, container) {
+    const { type, shapeFlag } = vnode;
+    switch (type) {
+        case Text:
+            processText();
+            break;
+        case Fragment:
+            processFragment();
+            break;
+        default:
+            if (shapeFlag & 1) {
+                processElement();
+            }
+            else if (shapeFlag & 6) {
+                processComponent(vnode);
+            }
+    }
+}
+function processText(vnode, container) {
+    throw new Error("Function processText not implemented.");
+}
+function processFragment(vnode, container) {
+    throw new Error("Function processFragment not implemented.");
+}
+function processElement(vnode, container) {
+    throw new Error("Function processElement not implemented.");
+}
+function processComponent(vnode, container) {
+    mountComponent(vnode);
+}
+function mountComponent(initialVnode, container) {
+    const instance = (initialVnode.component = createComponentInstance(initialVnode));
+    setupComponent(instance);
+}
 
 function createApp(rootComponent) {
+    const app = {
+        _component: rootComponent,
+        mount(rootContainer) {
+            console.info("基于根组件创建 vnode");
+            const vnode = createVNode(rootComponent);
+            console.info("调用 render(), 基于vnode进行开箱");
+            render(vnode);
+        },
+    };
+    return app;
 }
 
 const h = (type, props, children) => {
