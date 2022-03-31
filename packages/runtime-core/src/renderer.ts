@@ -56,5 +56,12 @@ function mountComponent(initialVnode: any, container: any) {
   // 2.setup instance，初始化组件
   setupComponent(instance);
 
+  // 3. 创建render的副作用
+  setupRenderEffect(instance, initialVnode, container);
+}
+
+// effect里面可以进行收集依赖，初次渲染就是需要收集所有的响应式依赖
+function setupRenderEffect(instance: any, initialVnode: any, container: any) {
+  instance.render();
 }
 

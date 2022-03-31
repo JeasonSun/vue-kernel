@@ -22,6 +22,8 @@ const isObject = (value) => {
     return value !== null && typeof value === "object";
 };
 const isString = (value) => typeof value === "string";
+const isFunction = (value) => typeof value === "function";
+const isPromise = (value) => isObject(value) && isFunction(value.then) && isFunction(value.catch);
 const hasChanged = (value, newValue) => {
     return !Object.is(value, newValue);
 };
@@ -247,20 +249,21 @@ function isRef(ref) {
 function unRef(ref) {
     return isRef(ref) ? ref.value : ref;
 }
+const shallowUnwrapHandlers = {
+    get(target, key) {
+        return unRef(Reflect.get(target, key));
+    },
+    set(target, key, value) {
+        if (isRef(target[key]) && !isRef(value)) {
+            return (target[key].value = value);
+        }
+        else {
+            return Reflect.set(target, key, value);
+        }
+    },
+};
 function proxyRefs(objectWithRefs) {
-    return new Proxy(objectWithRefs, {
-        get(target, key) {
-            return unRef(Reflect.get(target, key));
-        },
-        set(target, key, value) {
-            if (isRef(target[key]) && !isRef(value)) {
-                return (target[key].value = value);
-            }
-            else {
-                return Reflect.set(target, key, value);
-            }
-        },
-    });
+    return new Proxy(objectWithRefs, shallowUnwrapHandlers);
 }
 
 class ComputedRefImpl {
@@ -302,6 +305,15 @@ const createVNode = function (type, props, children) {
 const Text = Symbol("Text");
 const Fragment = Symbol("Fragment");
 
+function initProps(instance, rawProps) {
+    console.log("initProps");
+    instance.props = rawProps;
+}
+
+function initSlots(instance, children) {
+    if (instance.vnode.shapeFlag & 32) ;
+}
+
 function createComponentInstance(vnode) {
     const instance = {
         type: vnode.type,
@@ -313,7 +325,39 @@ function createComponentInstance(vnode) {
 }
 function setupComponent(instance) {
     console.log("setupComponent", instance);
-    instance.vnode;
+    const { props, children } = instance.vnode;
+    initProps(instance, props);
+    initSlots(instance);
+    const isStateful = isStatefulComponent(instance);
+    const setupResult = isStateful ? setupStatefulComponent(instance) : undefined;
+    return setupResult;
+}
+function isStatefulComponent(instance) {
+    return instance.vnode.shapeFlag & 4;
+}
+function setupStatefulComponent(instance) {
+    const Component = instance.type;
+    const { setup } = Component;
+    if (setup) {
+        const setupResult = setup();
+        handleSetupResult(instance, setupResult);
+    }
+}
+function handleSetupResult(instance, setupResult) {
+    if (isPromise(setupResult)) ;
+    else if (isFunction(setupResult)) {
+        instance.render = setupResult;
+    }
+    else if (isObject(setupResult)) {
+        instance.setupState = proxyRefs(setupResult);
+    }
+    finishComponentSetup(instance);
+}
+function finishComponentSetup(instance) {
+    const Component = instance.type;
+    if (!instance.render) {
+        instance.render = Component.render;
+    }
 }
 
 function render(vnode, container) {
@@ -352,6 +396,10 @@ function processComponent(vnode, container) {
 function mountComponent(initialVnode, container) {
     const instance = (initialVnode.component = createComponentInstance(initialVnode));
     setupComponent(instance);
+    setupRenderEffect(instance);
+}
+function setupRenderEffect(instance, initialVnode, container) {
+    instance.render();
 }
 
 function createApp(rootComponent) {

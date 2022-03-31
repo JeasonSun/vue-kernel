@@ -6,6 +6,11 @@ export const isObject = (value) => {
 
 export const isString = (value) => typeof value === "string";
 
+export const isFunction = (value) => typeof value === "function";
+
+export const isPromise = (value) =>
+  isObject(value) && isFunction(value.then) && isFunction(value.catch);
+
 export const hasChanged = (value, newValue) => {
   return !Object.is(value, newValue);
 };

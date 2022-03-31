@@ -1,6 +1,6 @@
 import { hasChanged, isObject } from "@vue-kernel/shared";
 import { isTracking, trackEffect, triggerEffect } from "./effect";
-import { reactive } from "./reactive";
+import { isReactive, reactive } from "./reactive";
 
 export class RefImpl {
   private _rawValue: any;
@@ -45,19 +45,26 @@ export function unRef(ref) {
   return isRef(ref) ? ref.value : ref;
 }
 
+const shallowUnwrapHandlers = {
+  get(target, key) {
+    return unRef(Reflect.get(target, key));
+  },
+  set(target, key, value) {
+    // 如果set的value不是一个Ref，那么就代理更改.value
+    if (isRef(target[key]) && !isRef(value)) {
+      return (target[key].value = value);
+    } else {
+      // 如果value是一个Ref，那么直接替换。
+      return Reflect.set(target, key, value);
+    }
+  },
+};
+
 export function proxyRefs(objectWithRefs) {
-  return new Proxy(objectWithRefs, {
-    get(target, key) {
-      return unRef(Reflect.get(target, key));
-    },
-    set(target, key, value) {
-      // 如果set的value不是一个Ref，那么就代理更改.value
-      if (isRef(target[key]) && !isRef(value)) {
-        return (target[key].value = value);
-      } else {
-        // 如果value是一个Ref，那么直接替换。
-        return Reflect.set(target, key, value);
-      }
-    },
-  });
+  // TODO: 源码中需要验证是否是isReactive，需要完善reactive
+  // 源码中reactive对象，如果key->value是Ref对象，不需要.value取值
+  // return isReactive(objectWithRefs)
+  //   ? objectWithRefs
+  //   : new Proxy(objectWithRefs, shallowUnwrapHandlers);
+  return new Proxy(objectWithRefs, shallowUnwrapHandlers);
 }
