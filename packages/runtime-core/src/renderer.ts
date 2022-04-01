@@ -62,6 +62,11 @@ function mountComponent(initialVnode: any, container: any) {
 
 // effect里面可以进行收集依赖，初次渲染就是需要收集所有的响应式依赖
 function setupRenderEffect(instance: any, initialVnode: any, container: any) {
-  instance.render();
+  //
+  const componentUpdateFn = () => {
+    instance.render();
+  }
+
+  
 }
 
