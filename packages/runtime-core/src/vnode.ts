@@ -27,10 +27,13 @@ export const createVNode = function (type, props?, children?) {
 export const Text = Symbol("Text");
 export const Fragment = Symbol("Fragment");
 
+// 标准化vnode的格式
+// 其目的是为了让child支持多种格式
 export function normalizeVNode(child) {
   if (typeof child === "string" || typeof child === "number") {
     return createVNode(Text, null, String(child));
   } else {
+    // TODO: 对于child需要判断是否是Array，如果是Array，需要Fragment包装
     return child;
   }
 }

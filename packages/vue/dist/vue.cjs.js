@@ -27,6 +27,9 @@ const isPromise = (value) => isObject(value) && isFunction(value.then) && isFunc
 const hasChanged = (value, newValue) => {
     return !Object.is(value, newValue);
 };
+function hasOwn(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key);
+}
 
 const targetMap = new WeakMap();
 let activeEffect = void 0;
@@ -304,11 +307,43 @@ const createVNode = function (type, props, children) {
 };
 const Text = Symbol("Text");
 const Fragment = Symbol("Fragment");
+function normalizeVNode(child) {
+    if (typeof child === "string" || typeof child === "number") {
+        return createVNode(Text, null, String(child));
+    }
+    else {
+        return child;
+    }
+}
 
 function initProps(instance, rawProps) {
     console.log("initProps");
     instance.props = rawProps;
 }
+
+const publicPropertiesMap = {
+    $el: (i) => i.vnode.el,
+    $emit: (i) => i.emit,
+    $slots: (i) => i.slots,
+    $props: (i) => i.props,
+};
+const PublicInstanceProxyHandlers = {
+    get({ _: instance }, key) {
+        console.log(`触发 proxy hook, key -> : ${key}`);
+        if (key[0] !== "$") ;
+        const publicGetter = publicPropertiesMap[key];
+        if (publicGetter) {
+            return publicGetter(instance);
+        }
+    },
+    set({ _: instance }, key, value) {
+        const { setupState } = instance;
+        if (setupState != {} && hasOwn(setupState, key)) {
+            setupState[key] = value;
+        }
+        return true;
+    },
+};
 
 function initSlots(instance, children) {
     if (instance.vnode.shapeFlag & 32) ;
@@ -320,6 +355,11 @@ function createComponentInstance(vnode) {
         vnode,
         isMounted: false,
         setupState: {},
+        proxy: null,
+        ctx: {},
+    };
+    instance.ctx = {
+        _: instance,
     };
     return instance;
 }
@@ -336,6 +376,7 @@ function isStatefulComponent(instance) {
     return instance.vnode.shapeFlag & 4;
 }
 function setupStatefulComponent(instance) {
+    instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers);
     const Component = instance.type;
     const { setup } = Component;
     if (setup) {
@@ -394,12 +435,18 @@ function processComponent(vnode, container) {
     mountComponent(vnode);
 }
 function mountComponent(initialVnode, container) {
-    const instance = (initialVnode.component = createComponentInstance(initialVnode));
+    const instance = (initialVnode.component =
+        createComponentInstance(initialVnode));
     setupComponent(instance);
     setupRenderEffect(instance);
 }
 function setupRenderEffect(instance, initialVnode, container) {
-    instance.render();
+    const componentUpdateFn = () => {
+        const proxyToUse = instance.proxy;
+        const subTree = (instance.subTree = normalizeVNode(instance.render.call(proxyToUse, proxyToUse)));
+        console.log(subTree);
+    };
+    effect(componentUpdateFn);
 }
 
 function createApp(rootComponent) {

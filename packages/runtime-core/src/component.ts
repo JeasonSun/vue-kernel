@@ -6,6 +6,7 @@ import {
   isFunction,
 } from "@vue-kernel/shared";
 import { initProps } from "./componentProps";
+import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { initSlots } from "./componentSlots";
 
 /**
@@ -19,6 +20,12 @@ export function createComponentInstance(vnode): any {
     vnode,
     isMounted: false,
     setupState: {},
+    proxy: null,
+    ctx: {}, // context对象
+  };
+
+  instance.ctx = {
+    _: instance,
   };
 
   return instance;
@@ -47,6 +54,9 @@ export function isStatefulComponent(instance) {
   return instance.vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT;
 }
 function setupStatefulComponent(instance: any) {
+  // 创建代理 proxy
+  instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers);
+
   const Component = instance.type;
   const { setup } = Component;
   if (setup) {
@@ -73,14 +83,13 @@ function handleSetupResult(instance: any, setupResult: any) {
 /**
  * 完成Component Setup
  * 确保instance上面有render函数
- * @param instance 
+ * @param instance
  */
 function finishComponentSetup(instance: any) {
   const Component = instance.type;
-  if(!instance.render){
+  if (!instance.render) {
     // TODO: 如果compile有值，需要将template编译成render函数
-    
+
     instance.render = Component.render;
   }
 }
-

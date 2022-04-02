@@ -1,6 +1,7 @@
-import { Fragment, Text } from "./vnode";
+import { Fragment, normalizeVNode, Text } from "./vnode";
 import { ShapeFlags } from "@vue-kernel/shared";
 import { createComponentInstance, setupComponent } from "./component";
+import { effect } from "@vue-kernel/reactivity";
 
 export function render(vnode, container) {
   patch(vnode, container);
@@ -39,20 +40,21 @@ function processElement(vnode: any, container: any) {
 
 /**
  * 处理组件
- * @param vnode 
- * @param container 
+ * @param vnode
+ * @param container
  */
 function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
 /**
  * 初始化组件
- * @param vnode 
- * @param container 
+ * @param vnode
+ * @param container
  */
 function mountComponent(initialVnode: any, container: any) {
   // 1.创建组件实例
-  const instance = (initialVnode.component = createComponentInstance(initialVnode))
+  const instance = (initialVnode.component =
+    createComponentInstance(initialVnode));
   // 2.setup instance，初始化组件
   setupComponent(instance);
 
@@ -64,9 +66,14 @@ function mountComponent(initialVnode: any, container: any) {
 function setupRenderEffect(instance: any, initialVnode: any, container: any) {
   //
   const componentUpdateFn = () => {
-    instance.render();
-  }
+    // mount阶段
+    const proxyToUse = instance.proxy;
+    const subTree = (instance.subTree = normalizeVNode(
+      // render的入参
+      instance.render.call(proxyToUse, proxyToUse)
+    ));
+    console.log(subTree);
+  };
 
-  
+  effect(componentUpdateFn);
 }
-
