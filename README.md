@@ -29,7 +29,7 @@
 - [ ] 支持 toRaw
 
 ### runtime-core
-- [ ] 支持组件类型
+- [x] 支持组件类型
 
 ### runtime-dom
 
