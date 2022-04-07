@@ -299,6 +299,12 @@ const createVNode = function (type, props, children) {
         children,
         shapeFlag,
     };
+    if (Array.isArray(children)) {
+        vnode.shapeFlag |= 16;
+    }
+    else if (typeof children === "string") {
+        vnode.shapeFlag |= 8;
+    }
     return vnode;
 };
 const Text = Symbol("Text");
@@ -398,7 +404,7 @@ function finishComponentSetup(instance) {
 }
 
 function render(vnode, container) {
-    patch(vnode);
+    patch(vnode, container);
 }
 function patch(vnode, container) {
     const { type, shapeFlag } = vnode;
@@ -411,10 +417,10 @@ function patch(vnode, container) {
             break;
         default:
             if (shapeFlag & 1) {
-                processElement();
+                processElement(vnode, container);
             }
             else if (shapeFlag & 6) {
-                processComponent(vnode);
+                processComponent(vnode, container);
             }
     }
 }
@@ -425,34 +431,55 @@ function processFragment(vnode, container) {
     throw new Error("Function processFragment not implemented.");
 }
 function processElement(vnode, container) {
-    throw new Error("Function processElement not implemented.");
+    mountElement(vnode, container);
 }
 function processComponent(vnode, container) {
-    mountComponent(vnode);
+    mountComponent(vnode, container);
 }
 function mountComponent(initialVnode, container) {
     const instance = (initialVnode.component =
         createComponentInstance(initialVnode));
     setupComponent(instance);
-    setupRenderEffect(instance);
+    setupRenderEffect(instance, initialVnode, container);
 }
 function setupRenderEffect(instance, initialVnode, container) {
     const componentUpdateFn = () => {
         const proxyToUse = instance.proxy;
         const subTree = (instance.subTree = normalizeVNode(instance.render.call(proxyToUse, proxyToUse)));
-        console.log(subTree);
+        console.log("subTree", subTree);
+        console.log(`${instance.type.name}: 触发 beforeMount hook`);
+        console.log(`${instance.type.name}: 触发 onVnodeBeforeMount hook`);
+        patch(subTree, container);
+        initialVnode.el = subTree.el;
+        console.log(`${instance.type.name}: 触发 mounted hook`);
+        instance.isMounted = true;
     };
     effect(componentUpdateFn);
+}
+function mountElement(vnode, container) {
+    const { shapeFlag, props, type } = vnode;
+    console.log("mountElement", vnode);
+    console.log("container", container);
+    const el = (vnode.el = document.createElement(type));
+    if (shapeFlag & 16) ;
+    else if (shapeFlag & 8) {
+        console.log(`处理文本节点: ${vnode.children}`);
+        el.textContent = vnode.children;
+    }
+    console.log("vnodeHook -> onVnodeBeforeMount");
+    console.log("DirectiveHook -> beforeMount");
+    console.log("transition -> beforeEnter");
+    container.insertBefore(el, null);
 }
 
 function createApp(rootComponent) {
     const app = {
         _component: rootComponent,
         mount(rootContainer) {
-            console.info("基于根组件创建 vnode");
+            console.info("基于根组件创建 vnode", rootComponent);
             const vnode = createVNode(rootComponent);
-            console.info("调用 render(), 基于vnode进行开箱");
-            render(vnode);
+            console.info("调用 render(), 基于vnode进行开箱", rootContainer);
+            render(vnode, rootContainer);
         },
     };
     return app;

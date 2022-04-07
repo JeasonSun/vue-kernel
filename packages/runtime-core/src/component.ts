@@ -12,7 +12,7 @@ import { initSlots } from "./componentSlots";
 /**
  *
  * @param vnode
- * 对于Component Instance中， type就是包含render setup等的一个对象
+ * 对于Component Instance中， type就是包含render/setup等的一个对象
  */
 export function createComponentInstance(vnode): any {
   const instance = {

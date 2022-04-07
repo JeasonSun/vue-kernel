@@ -16,11 +16,23 @@ export const createVNode = function (type, props?, children?) {
     el: null,
     component: null,
     key: props?.key,
-    type,
+    type, // TIP:  Symbol("Text") || string('div|p|...') || Object
     props: props || {},
     children,
     shapeFlag,
   };
+  // 基于 children再次设置 shapeFlag
+  // [h(), h()]
+  // h()
+  // text
+  if (Array.isArray(children)) {
+    vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
+  } else if (typeof children === "string") {
+    vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
+  }
+
+  // TODO: normalizeChildren() 
+
   return vnode;
 };
 

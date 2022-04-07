@@ -35,7 +35,7 @@ function processFragment(vnode: any, container: any) {
 }
 
 function processElement(vnode: any, container: any) {
-  throw new Error("Function processElement not implemented.");
+  mountElement(vnode, container);
 }
 
 /**
@@ -72,8 +72,42 @@ function setupRenderEffect(instance: any, initialVnode: any, container: any) {
       // render的入参
       instance.render.call(proxyToUse, proxyToUse)
     ));
-    console.log(subTree);
+    console.log("subTree", subTree);
+    // TODO: 添加生命钩子
+    console.log(`${instance.type.name}: 触发 beforeMount hook`);
+    console.log(`${instance.type.name}: 触发 onVnodeBeforeMount hook`);
+
+    // 这里基于subTree再次调用patch
+    // 基于render返回的vnode，再次进行渲染
+    patch(subTree, container);
+    // 把root element 赋值给组件的vnode.el， 后续调用$el获取值
+    initialVnode.el = subTree.el;
+    console.log(`${instance.type.name}: 触发 mounted hook`);
+    instance.isMounted = true;
   };
 
   effect(componentUpdateFn);
+}
+
+function mountElement(vnode, container) {
+  const { shapeFlag, props, type } = vnode;
+  console.log("mountElement", vnode);
+  console.log("container", container);
+  // 1. 先创建element
+  const el = (vnode.el = document.createElement(type));
+  // 2. 处理子组件：支持单子组件和多子组件的创建
+  if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+    // 如果是数组children
+  } else if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+    console.log(`处理文本节点: ${vnode.children}`);
+    el.textContent = vnode.children;
+  }
+  // 处理props
+
+  // TODO:  触发钩子
+  console.log("vnodeHook -> onVnodeBeforeMount");
+  console.log("DirectiveHook -> beforeMount");
+  console.log("transition -> beforeEnter");
+
+  container.insertBefore(el, null);
 }

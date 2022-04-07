@@ -20,6 +20,7 @@ export default {
   setup() {},
   render() {
     console.log('render App')
-    return h("div", { tId: 1 }, [h("p", {}, "homePage"), h(HelloWorld)]);
+    return h("div", { tId: 1 }, "hello world");
+    // return h("div", { tId: 1 }, [h("p", {}, "homePage"), h(HelloWorld)]);
   },
 };
