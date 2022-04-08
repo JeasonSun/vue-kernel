@@ -461,15 +461,32 @@ function mountElement(vnode, container) {
     console.log("mountElement", vnode);
     console.log("container", container);
     const el = (vnode.el = document.createElement(type));
-    if (shapeFlag & 16) ;
+    if (shapeFlag & 16) {
+        mountChildren(vnode.children, el);
+    }
     else if (shapeFlag & 8) {
         console.log(`处理文本节点: ${vnode.children}`);
         el.textContent = vnode.children;
+    }
+    if (props) {
+        for (const key in props) {
+            const nextVal = props[key];
+            hostPatchProp(el, key, nextVal);
+        }
     }
     console.log("vnodeHook -> onVnodeBeforeMount");
     console.log("DirectiveHook -> beforeMount");
     console.log("transition -> beforeEnter");
     container.insertBefore(el, null);
+}
+function mountChildren(children, container) {
+    children.forEach((vNodeChild) => {
+        console.log("mount Children :", vNodeChild);
+        patch(vNodeChild, container);
+    });
+}
+function hostPatchProp(el, key, value) {
+    el.setAttribute(key, value);
 }
 
 function createApp(rootComponent) {

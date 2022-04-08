@@ -98,11 +98,20 @@ function mountElement(vnode, container) {
   // 2. 处理子组件：支持单子组件和多子组件的创建
   if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     // 如果是数组children
+    mountChildren(vnode.children, el);
   } else if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     console.log(`处理文本节点: ${vnode.children}`);
     el.textContent = vnode.children;
   }
   // 处理props
+  if (props) {
+    for (const key in props) {
+      // TODO: 需要过滤一些Vue自身用的key
+      // 比如生命周期相关的key  beforeMount/mounted
+      const nextVal = props[key];
+      hostPatchProp(el, key, nextVal);
+    }
+  }
 
   // TODO:  触发钩子
   console.log("vnodeHook -> onVnodeBeforeMount");
@@ -110,4 +119,15 @@ function mountElement(vnode, container) {
   console.log("transition -> beforeEnter");
 
   container.insertBefore(el, null);
+}
+
+function mountChildren(children, container) {
+  children.forEach((vNodeChild) => {
+    console.log("mount Children :", vNodeChild);
+    patch(vNodeChild, container);
+  });
+}
+
+function hostPatchProp(el, key, value) {
+  el.setAttribute(key, value);
 }
