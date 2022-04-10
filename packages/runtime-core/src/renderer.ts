@@ -1,5 +1,5 @@
 import { Fragment, normalizeVNode, Text } from "./vnode";
-import { ShapeFlags } from "@vue-kernel/shared";
+import { isOn, ShapeFlags } from "@vue-kernel/shared";
 import { createComponentInstance, setupComponent } from "./component";
 import { effect } from "@vue-kernel/reactivity";
 
@@ -68,6 +68,7 @@ function setupRenderEffect(instance: any, initialVnode: any, container: any) {
   const componentUpdateFn = () => {
     // mount阶段
     const proxyToUse = instance.proxy;
+    console.log("proxyToUse", proxyToUse);
     const subTree = (instance.subTree = normalizeVNode(
       // render的入参
       instance.render.call(proxyToUse, proxyToUse)
@@ -128,6 +129,14 @@ function mountChildren(children, container) {
   });
 }
 
+// 处理props
 function hostPatchProp(el, key, value) {
-  el.setAttribute(key, value);
+  if (isOn(key)) {
+    // 如果是on开头，那认为是事件
+
+    const eventName = key.slice(2).toLowerCase();
+    el.addEventListener(eventName, value);
+  } else {
+    el.setAttribute(key, value);
+  }
 }

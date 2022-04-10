@@ -26,6 +26,9 @@ const hasChanged = (value, newValue) => {
 function hasOwn(obj, key) {
     return Object.prototype.hasOwnProperty.call(obj, key);
 }
+function isOn(key) {
+    return /^on[A-Z]/.test(key);
+}
 
 const targetMap = new WeakMap();
 let activeEffect = void 0;
@@ -302,7 +305,7 @@ const createVNode = function (type, props, children) {
     if (Array.isArray(children)) {
         vnode.shapeFlag |= 16;
     }
-    else if (typeof children === "string") {
+    else if (typeof children === "string" || typeof children === 'number') {
         vnode.shapeFlag |= 8;
     }
     return vnode;
@@ -316,6 +319,9 @@ function normalizeVNode(child) {
     else {
         return child;
     }
+}
+function createTextNode(text = "") {
+    return createVNode(Text, {}, text.toString());
 }
 
 function initProps(instance, rawProps) {
@@ -331,8 +337,16 @@ const publicPropertiesMap = {
 };
 const PublicInstanceProxyHandlers = {
     get({ _: instance }, key) {
+        const { setupState, props } = instance;
         console.log(`触发 proxy hook, key -> : ${key}`);
-        if (key[0] !== "$") ;
+        if (key[0] !== "$") {
+            if (hasOwn(setupState, key)) {
+                return setupState[key];
+            }
+            if (hasOwn(props, key)) {
+                return props[key];
+            }
+        }
         const publicGetter = publicPropertiesMap[key];
         if (publicGetter) {
             return publicGetter(instance);
@@ -382,7 +396,8 @@ function setupStatefulComponent(instance) {
     const Component = instance.type;
     const { setup } = Component;
     if (setup) {
-        const setupResult = setup();
+        const setupContext = createSetupContext(instance);
+        const setupResult = setup(shallowReadonly(instance.props), setupContext);
         handleSetupResult(instance, setupResult);
     }
 }
@@ -401,6 +416,15 @@ function finishComponentSetup(instance) {
     if (!instance.render) {
         instance.render = Component.render;
     }
+}
+function createSetupContext(instance) {
+    console.log("初始化 setup context");
+    return {
+        attrs: instance.attrs,
+        slots: instance.slots,
+        emit: instance.emit,
+        expose: () => { },
+    };
 }
 
 function render(vnode, container) {
@@ -445,6 +469,7 @@ function mountComponent(initialVnode, container) {
 function setupRenderEffect(instance, initialVnode, container) {
     const componentUpdateFn = () => {
         const proxyToUse = instance.proxy;
+        console.log("proxyToUse", proxyToUse);
         const subTree = (instance.subTree = normalizeVNode(instance.render.call(proxyToUse, proxyToUse)));
         console.log("subTree", subTree);
         console.log(`${instance.type.name}: 触发 beforeMount hook`);
@@ -486,7 +511,13 @@ function mountChildren(children, container) {
     });
 }
 function hostPatchProp(el, key, value) {
-    el.setAttribute(key, value);
+    if (isOn(key)) {
+        const eventName = key.slice(2).toLowerCase();
+        el.addEventListener(eventName, value);
+    }
+    else {
+        el.setAttribute(key, value);
+    }
 }
 
 function createApp(rootComponent) {
@@ -506,5 +537,5 @@ const h = (type, props, children) => {
     return createVNode(type, props, children);
 };
 
-export { computed, createApp, createVNode, effect, h, isProxy, isReactive, isReadonly, isRef, isShallow, proxyRefs, reactive, readonly, ref, shallowReactive, shallowReadonly, stop, unRef };
+export { computed, createApp, createTextNode, createVNode, effect, h, isProxy, isReactive, isReadonly, isRef, isShallow, proxyRefs, reactive, readonly, ref, shallowReactive, shallowReadonly, stop, unRef };
 //# sourceMappingURL=vue.esm-bundler.js.map

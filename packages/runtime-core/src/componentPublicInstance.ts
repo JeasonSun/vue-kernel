@@ -13,6 +13,15 @@ export const PublicInstanceProxyHandlers = {
     console.log(`触发 proxy hook, key -> : ${key}`);
     if (key[0] !== "$") {
       // TODO: 处理非 $ 开头的
+      // 先看setupState中有没有
+      if (hasOwn(setupState, key)) {
+        return setupState[key];
+      }
+      if (hasOwn(props, key)) {
+        return props[key];
+      }
+
+      // 再看 props 中有没有
     }
     // publicGetter其实就是代理获取instance上的属性的方法
     const publicGetter = publicPropertiesMap[key];

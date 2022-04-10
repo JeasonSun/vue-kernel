@@ -27,11 +27,11 @@ export const createVNode = function (type, props?, children?) {
   // text
   if (Array.isArray(children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
-  } else if (typeof children === "string") {
+  } else if (typeof children === "string" || typeof children === 'number') {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   }
 
-  // TODO: normalizeChildren() 
+  // TODO: normalizeChildren()
 
   return vnode;
 };
@@ -48,4 +48,8 @@ export function normalizeVNode(child) {
     // TODO: 对于child需要判断是否是Array，如果是Array，需要Fragment包装
     return child;
   }
+}
+
+export function createTextNode(text: string | number = "") {
+  return createVNode(Text, {}, text.toString());
 }

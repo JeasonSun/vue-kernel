@@ -1,3 +1,3 @@
 export { createApp } from "./apiCreateApp";
-export { createVNode } from "./vnode";
+export { createVNode, createTextNode } from "./vnode";
 export { h } from "./h";
